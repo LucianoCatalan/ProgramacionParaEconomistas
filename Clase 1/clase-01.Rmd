@@ -1,0 +1,542 @@
+---
+title: "Clase 1: Introducción a R"
+subtitle: "Instalación, objetos, tipos de datos, estructuras y matrices"
+author: "Introducción a la Programación para Economistas"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##")
+```
+
+---
+
+# ¿Por qué programar?
+
+Antes de escribir una sola línea de código, vale la pena preguntarse para qué.
+
+Como economista, una parte enorme de tu trabajo consiste en obtener datos, limpiarlos, analizarlos y comunicar resultados. Eso puede hacerse en Excel, en Stata, o en R y Python. Entonces, ¿por qué molestarse en aprender a programar?
+
+La respuesta es **reproducibilidad**. Cuando tu análisis vive en un script, cualquiera —incluyendo tú mismo en seis meses— puede abrirlo y volver a correrlo exactamente igual. No hay clics que recordar, no hay pasos ocultos. El código *es* la metodología.
+
+Además, el código escala. Si hoy limpias datos de un estado, mañana puedes limpiar los 32 con el mismo script. Si hoy haces una gráfica, mañana puedes hacer cien automáticamente. Y cuando alguien te pida cambiar algo, lo cambias en un lugar y vuelves a correr todo.
+
+---
+
+# Instalación
+
+Vamos a instalar dos cosas: **R** (el lenguaje) y **RStudio** (el entorno donde vamos a trabajar). Son distintos: R es el motor, RStudio es el tablero de control.
+
+## Instalar R
+
+1. Ve a [https://cran.r-project.org](https://cran.r-project.org)
+2. Haz clic en el enlace correspondiente a tu sistema operativo (Windows, Mac, Linux)
+3. Descarga e instala la versión más reciente
+
+## Instalar RStudio
+
+1. Ve a [https://posit.co/download/rstudio-desktop](https://posit.co/download/rstudio-desktop)
+2. Descarga la versión gratuita (RStudio Desktop)
+3. Instala normalmente
+
+## La interfaz de RStudio
+
+Al abrir RStudio verás cuatro paneles:
+
+- **Editor** (arriba izquierda): donde escribes y guardas tus scripts
+- **Consola** (abajo izquierda): donde R ejecuta el código y muestra los resultados
+- **Entorno** (arriba derecha): los objetos que tienes en memoria
+- **Archivos / Gráficas / Ayuda** (abajo derecha): explorador de archivos, visualizador de gráficas, documentación
+
+Puedes correr código de dos formas: escribirlo directamente en la consola (para probar cosas rápido) o escribirlo en el editor y presionar `Ctrl + Enter` (Windows) o `Cmd + Enter` (Mac) para ejecutar la línea donde está el cursor.
+
+---
+
+# Markdown y R Markdown
+
+Antes de empezar a programar en serio, conviene entender en qué tipo de archivo vamos a trabajar.
+
+Este archivo es un `.Rmd` — **R Markdown**. Combina texto normal con bloques de código R. Al hacer clic en **Knit**, RStudio ejecuta todo el código y genera un documento HTML o PDF con el texto, el código y los resultados juntos en un solo lugar.
+
+Esto es poderoso porque el reporte y el análisis son la misma cosa. Si cambias los datos y vuelves a hacer Knit, todo se actualiza solo.
+
+## Sintaxis de Markdown
+
+Markdown es una forma simple de darle formato a texto plano usando símbolos:
+
+```markdown
+# Título principal
+## Sección
+### Subsección
+
+**negrita**   *itálica*   `código en línea`
+
+- lista con viñetas
+- otro elemento
+
+1. lista numerada
+2. segundo elemento
+
+> Esto es una cita o nota importante
+
+[texto del enlace](https://url.com)
+```
+
+## Bloques de código en R Markdown
+
+El código R va dentro de chunks delimitados así:
+
+````markdown
+```{r}
+# aquí va tu código
+2 + 2
+```
+````
+
+El resultado aparece justo debajo al hacer Knit. A lo largo del curso todos los trabajos serán en este formato: código y su interpretación juntos en el mismo documento.
+
+---
+
+# R como calculadora
+
+Empecemos desde lo más básico. R puede usarse como una calculadora:
+
+```{r}
+10 / 2
+sqrt(144)
+exp(1)        # número de Euler, e ≈ 2.718
+2^10
+log(100)      # logaritmo natural
+log(100, 10)  # logaritmo base 10
+1000 %% 7     # Residula de 1000 entre 7 
+```
+
+Nota que R ignora los espacios en blanco dentro de una expresión, pero usarlos hace el código más legible.
+
+---
+
+# Objetos y asignación
+
+Lo que hace a R útil no es calcular `2 + 2`, sino poder **guardar resultados y trabajar con ellos**. Para eso usamos objetos.
+
+```{r}
+pib_nominal <- 24000000   # millones de pesos corrientes
+deflactor   <- 112.4      # índice de precios, base 2015 = 100
+
+# Calcular PIB real
+pib_real <- pib_nominal / (deflactor / 100)
+pib_real
+```
+
+El operador `<-` se lee "asigna". Creamos el objeto `pib_real` y le guardamos el resultado del cálculo.
+
+> **¿Por qué `<-` y no `=`?** Técnicamente ambos funcionan, pero `=` también tiene otros usos en R —dentro de funciones, por ejemplo— lo que puede causar confusión. Usar `<-` es la convención estándar y hace el código más claro.
+
+Los objetos se pueden usar en operaciones posteriores exactamente como si fueran números:
+
+```{r}
+tasa_crecimiento <- 0.032   # 3.2% anual
+años             <- 10
+
+# ¿Cuánto crece el PIB en 10 años?
+pib_real * (1 + tasa_crecimiento)^años
+```
+
+---
+
+# Operadores lógicos
+
+Los operadores lógicos devuelven `TRUE` o `FALSE`. Son fundamentales para filtrar datos más adelante.
+
+```{r}
+5 == 5      # igual a
+5 != 3      # distinto de
+8 > 5       # mayor que
+8 >= 8      # mayor o igual
+3 < 2       # menor que
+```
+
+Se pueden combinar con `&` (y) y `|` (o):
+
+```{r}
+(5 > 3) & (2 > 1)    # Y — ambas deben ser TRUE
+(5 > 3) & (2 > 10)   # Y — falla porque 2 > 10 es FALSE
+(5 > 3) | (2 > 10)   # O — basta con que una sea TRUE
+!(5 > 3)             # negación — invierte el resultado
+```
+
+---
+
+# Tipos de datos
+
+R clasifica los valores en tipos. Conocerlos evita errores difíciles de detectar.
+
+```{r}
+# Numérico 
+pib <- 1322.5
+class(pib)
+
+# Texto — siempre entre comillas
+pais <- "México"
+class(pais)
+
+# Lógico
+en_ocde <- TRUE
+class(en_ocde)
+
+# Factor — categórico con niveles definidos
+nivel_ingreso <- factor("Alto", levels = c("Bajo", "Medio", "Alto"))
+class(nivel_ingreso)
+```
+
+Un truco útil: `TRUE` y `FALSE` se comportan como 1 y 0 en operaciones numéricas, lo que permite contar condiciones de manera ordenada:
+
+```{r}
+cumple_criterio <- c(TRUE, FALSE, TRUE, TRUE, FALSE)
+sum(cumple_criterio)    # cuántos son TRUE
+mean(cumple_criterio)   # proporción que cumple
+```
+
+## Valores especiales
+
+Estos aparecen seguido cuando trabajas con datos reales:
+
+```{r}
+0 / 0     # NaN — resultado matemáticamente indefinido
+1 / 0     # Inf — infinito
+
+x <- c(10, NA, 30)   # NA = dato faltante
+mean(x)               # NA contamina el resultado
+mean(x, na.rm = TRUE) # na.rm = TRUE lo ignora
+```
+
+Aprender a manejar `NA` bien es una de las habilidades más prácticas en el análisis de datos pues los datos reales siempre tienen valores faltantes.
+
+## Conversión entre tipos
+
+```{r}
+as.numeric("3.14")    # texto → número
+as.character(2024)    # número → texto
+as.logical(0)         # 0 → FALSE
+as.logical(5)         # cualquier número ≠ 0 → TRUE
+```
+
+---
+
+# Vectores
+
+Un vector es la estructura más básica de R: una secuencia de valores **del mismo tipo**. Casi todo en R es un vector por dentro.
+
+```{r}
+# c() significa "combine"
+paises    <- c("México", "Brasil", "Argentina", "Colombia", "Chile")
+pib_2023  <- c(1322, 2174, 641, 363, 344)   # miles de millones USD
+poblacion <- c(128, 215, 46, 52, 19)         # millones de habitantes
+```
+
+## Vectorización
+
+R aplica las operaciones a **todos los elementos a la vez** sin necesidad de un ciclo. Esto se llama vectorización:
+
+```{r}
+# PIB per cápita de los cinco países en una sola línea
+pib_pc <- pib_2023 / poblacion
+pib_pc
+
+# Aumentar todos los PIB en 10%
+pib_2023 * 1.10
+```
+
+## Estadísticos descriptivos
+
+```{r}
+mean(pib_2023)
+median(pib_2023)
+sd(pib_2023)
+min(pib_2023)
+max(pib_2023)
+summary(pib_2023)   # todo junto
+```
+
+## Indexación
+
+Para extraer elementos de un vector se usan corchetes `[]`. R empieza a contar desde 1, no desde 0:
+
+```{r}
+pib_2023[1]               # primer elemento
+pib_2023[1:3]             # primeros tres
+pib_2023[-1]              # todos menos el primero
+pib_2023[pib_2023 > 500]  # los que superan 500
+
+# Combinar con otro vector: ¿qué países tienen PIB > 500?
+paises[pib_2023 > 500]
+```
+
+## Secuencias
+
+```{r}
+1:10                          # del 1 al 10
+seq(2000, 2024, by = 1)       # años del 2000 al 2024
+seq(0, 1, length.out = 6)     # 6 valores igualmente espaciados entre 0 y 1
+rep(0, times = 5)             # repetir el valor 0 cinco veces
+```
+
+---
+
+# Data frames
+
+Un data frame es una tabla: columnas son vectores del mismo largo, pero pueden ser de distinto tipo. Es la estructura más usada para análisis de datos.
+
+```{r}
+latam <- data.frame(
+  pais      = paises,
+  pib       = pib_2023,
+  poblacion = poblacion,
+  pib_pc    = pib_pc
+)
+
+latam
+```
+
+## Explorar un data frame
+
+```{r}
+nrow(latam)     # filas
+ncol(latam)     # columnas
+dim(latam)      # ambas dimensiones
+names(latam)    # nombres de columnas
+str(latam)      # estructura: tipos y primeros valores
+summary(latam)  # estadísticos por columna
+```
+
+## Acceder a columnas y filas
+
+```{r}
+latam$pib                    # columna completa
+latam[1, ]                   # primera fila
+latam[1, "pais"]             # celda específica
+latam[latam$pib > 500, ]     # filas que cumplen una condición
+```
+
+## Agregar columnas
+
+```{r}
+latam$participacion <- latam$pib / sum(latam$pib) * 100
+latam
+```
+
+---
+
+# Listas
+
+Una lista puede guardar objetos de cualquier tipo y tamaño. Se usa mucho para almacenar resultados de modelos: cuando corres `lm()`, el resultado es una lista con coeficientes, residuales, estadísticos y más.
+
+```{r}
+informe <- list(
+  titulo    = "Reporte económico regional 2023",
+  años      = 2018:2023,
+  datos     = latam,
+  publicado = TRUE
+)
+
+# Tres formas de acceder al mismo elemento
+informe$titulo
+informe[["titulo"]]
+informe[[1]]
+```
+
+---
+
+# Matrices
+
+Una matriz es un vector en dos dimensiones: filas y columnas, todos del mismo tipo. Son la base del álgebra lineal en R y, por lo tanto, de la econometría.
+
+## Crear matrices
+
+```{r}
+A <- matrix(c(1, 2, 3,
+              4, 5, 6,
+              7, 8, 9),
+            nrow = 3, ncol = 3, byrow = TRUE)
+A
+```
+
+Con `byrow = TRUE` los datos se llenan fila por fila, que es más intuitivo cuando los escribes manualmente.
+
+## Indexación
+
+```{r}
+A[1, ]    # primera fila completa
+A[, 2]    # segunda columna completa
+A[2, 3]   # elemento en fila 2, columna 3
+```
+
+## Operaciones
+
+```{r}
+B <- matrix(c(9, 8, 7,
+              6, 5, 4,
+              3, 2, 1),
+            nrow = 3, byrow = TRUE)
+
+A + B      # suma elemento a elemento
+A * B      # multiplicación elemento a elemento — ojo: NO es el producto matricial
+A * 2      # multiplicar por un escalar
+```
+
+## Álgebra matricial
+
+Aquí es donde las matrices se vuelven poderosas:
+
+```{r}
+# Producto matricial
+A %*% B
+
+# Transpuesta
+t(A)
+
+# Para invertir necesitamos una matriz cuadrada e invertible
+C <- matrix(c(2, 1,
+              1, 3), nrow = 2, byrow = TRUE)
+
+det(C)        # determinante — si es 0, no es invertible
+solve(C)      # inversa
+
+# Verificación: C %*% C⁻¹ debe dar la matriz identidad
+round(C %*% solve(C), 10)
+```
+
+La función `solve()` también sirve para resolver sistemas de ecuaciones lineales $Cx = b$:
+
+```{r}
+b <- c(5, 7)
+solve(C, b)   # encuentra x tal que C %*% x = b
+```
+
+---
+
+# Buenas prácticas
+
+Escribir código que funcione es la mitad del trabajo. La otra mitad es escribir código que se pueda leer, entender y mantener — por ti mismo y por otros.
+
+## 1. Nombres descriptivos
+
+El nombre de un objeto debe decir qué contiene, no cómo se ve:
+
+```{r, eval=FALSE}
+# Mal
+x  <- 0.045
+df <- read.csv("archivo.csv")
+m  <- mean(salarios)
+n  <- length(salarios)
+
+# Bien
+tasa_inflacion  <- 0.045
+datos_enigh     <- read.csv("enigh_2022.csv")
+salario_promedio <- mean(salarios)
+num_trabajadores <- length(salarios)
+```
+
+La regla práctica: si tienes que ir a ver qué hace una variable para entender el código, el nombre es malo.
+
+## 2. Comentarios que explican el por qué
+
+Un comentario no debe describir lo que ya es obvio del código. Debe explicar la decisión detrás:
+
+```{r, eval=FALSE}
+# Mal: repite lo que el código ya dice
+pib_real <- pib_nominal / deflactor  # divide pib_nominal entre deflactor
+
+# Bien: explica el criterio o la fuente
+pib_real <- pib_nominal / (deflactor / 100)  # deflactor en base 2015, INEGI
+
+# Muy bien: documenta una decisión no obvia
+# Excluimos 2009 por el quiebre estructural de la crisis financiera
+datos_limpios <- datos[datos$año != 2009, ]
+```
+
+## 3. Formato y espacios
+
+El espacio en blanco es gratis. Úsalo:
+
+```{r, eval=FALSE}
+# Mal: ilegible aunque funcione
+x<-c(1,2,3,4,5);y<-mean(x)/sd(x);z<-x[x>y]
+
+# Bien: respira
+x <- c(1, 2, 3, 4, 5)
+y <- mean(x) / sd(x)
+z <- x[x > y]
+```
+
+Convenciones que seguimos en el curso:
+
+- Espacios alrededor de `<-` y de operadores (`+`, `-`, `*`, `/`, `==`)
+- Espacio después de cada coma, no antes
+- Una instrucción por línea
+- Líneas de máximo ~80 caracteres
+
+## 4. Estructura de proyecto
+
+Organiza tus proyectos siempre igual. Cuando vuelvas a un análisis en seis meses, o cuando alguien más lo tenga que reproducir, la estructura habla por sí sola:
+
+```
+mi_proyecto/
+├── datos/
+│   ├── raw/        # datos originales — se descargan, nunca se modifican
+│   └── clean/      # datos procesados por tus scripts
+├── scripts/        # archivos .R y .Rmd, numerados en orden de ejecución
+│   ├── 01_limpieza.R
+│   ├── 02_analisis.R
+│   └── 03_graficas.R
+├── output/         # gráficas, tablas, reportes generados
+└── README.md       # descripción del proyecto: qué hace, cómo reproducirlo
+```
+
+Los datos en `raw/` son sagrados. Nunca los sobreescribas. Si tu script los modifica, guarda el resultado en `clean/`. Así siempre puedes volver al punto de partida.
+
+## 5. No repetir código
+
+Si escribes el mismo bloque de código más de dos veces, ya merece una función. Comparar:
+
+```{r, eval=FALSE}
+# Mal: si cambia la fórmula, hay que cambiarla en tres lugares
+pib_real_2020 <- pib_nom_2020 / (deflactor_2020 / 100)
+pib_real_2021 <- pib_nom_2021 / (deflactor_2021 / 100)
+pib_real_2022 <- pib_nom_2022 / (deflactor_2022 / 100)
+
+# Bien: una función, un lugar donde corregir
+deflactar <- function(pib_nominal, deflactor) {
+  pib_nominal / (deflactor / 100)
+}
+
+pib_real_2020 <- deflactar(pib_nom_2020, deflactor_2020)
+pib_real_2021 <- deflactar(pib_nom_2021, deflactor_2021)
+pib_real_2022 <- deflactar(pib_nom_2022, deflactor_2022)
+```
+
+Veremos funciones en detalle más adelante, pero vale tenerlo presente desde el principio.
+
+## 6. El entorno limpio es tu amigo
+
+Al inicio de cada script, conviene limpiar el entorno para evitar que objetos de sesiones anteriores interfieran con los resultados:
+
+```{r, eval=FALSE}
+rm(list = ls())   # elimina todos los objetos del entorno
+```
+
+Y cargar desde el principio todos los paquetes que vas a usar, en la primera sección del script:
+
+```{r, eval=FALSE}
+library(tidyverse)
+library(readxl)
+```
+
+Así cualquiera puede abrir el script, correrlo de arriba a abajo, y obtener exactamente los mismos resultados.
+
